@@ -1,0 +1,149 @@
+﻿@model UniversityCourseResultManagementSystem.Models.CourseEnroll
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string message = ViewBag.Message ?? "";
+    string errorMessage = ViewBag.ErrorMessage ?? "";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width"/>
+    <title>EnrollCourse</title>
+    <script src="~/Scripts/jquery-3.1.0.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+</head>
+<body>
+    <h2>Enroll In a Course</h2>
+
+    <form method="post" id="enrollSubmit">
+
+        <div class="form-horizontal">
+            <h3 id="successMessage" style="color:forestgreen">@message</h3><h3 style="color:red">@errorMessage</h3>
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="form-group">
+                @Html.LabelFor(model => model.Student, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownListFor(model => model.Student, new SelectList(ViewBag.RegistationList, "Value", "Text"), new { @class = "form-control", @onchange = "FillStudent()" })
+                    @Html.ValidationMessageFor(model => model.Student, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control", @readonly = "readonly" })
+                    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @readonly = "readonly" })
+                    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Department, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(model => model.Department, new { @class = "form-control", @readonly = "readonly" })
+                    @Html.ValidationMessageFor(model => model.Department, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Course, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownListFor(model => model.Course, new SelectList(string.Empty, "Value", "Text"), new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Course, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Dates, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(model => model.Dates, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Dates, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-4 col-md-10">
+                    <input type="submit" value="Enroll" class="btn btn-default" @*onclick="SubmitForm()"*@ />
+                </div>
+            </div>
+        </div>
+    </form>
+    <script>
+        $("#Dates").datepicker();
+
+        $(document).ready(function () {
+            $("#enrollSubmit").on('submit', function () {
+                var that = $(this),
+                url = that.attr('action'),
+                method = that.attr('method'),
+                data = {};
+
+                that.find('[name]').each(function (index, value) {
+                    var that = $(this),
+                        name = that.attr('name'),
+                        value = that.val();
+                    data[name] = value;
+                });
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("EnrollCourse")',
+                    dataType: 'json',
+                    data: { course: data },
+                    success: function (data) {
+                        alert(data.success);
+                    }
+                })
+
+                return false;
+            })
+        })
+       
+
+        function FillStudent() {
+            $("#Name").empty();
+            $("#Email").empty();
+            $("#Department").empty();
+            $("#Course").empty();
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("StudentInformation")',
+                dataType: 'json',
+                data: { id: $("#Student").val() },
+                success: function (data) {
+                    $("#Name").val(data.Name);
+                    $("#Email").val(data.Email);
+                    $("#Department").val(data.Department);
+                    var deptCode = data.Department;
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("CourseList")',
+                        dataType: 'json',
+                        data: { name: $("#Department").val() },
+                        cache: false,
+                        success: function (data) {
+                            $.each(data, function (c, cour) {
+                                $("#Course").append('<option value="' + cour.Value + '">' + cour.Text + '</option>')
+                            })
+                        }
+                    })
+                    return false;
+                }
+            })
+            return false;
+        }
+    </script>
+
+
+</body>
+</html>

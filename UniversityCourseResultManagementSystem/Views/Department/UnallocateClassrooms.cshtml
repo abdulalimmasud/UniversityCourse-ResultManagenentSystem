@@ -1,0 +1,23 @@
+﻿
+@{
+    ViewBag.Title = "UnallocateClassrooms";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string message = ViewBag.Message ?? "";
+    string errorMessage = ViewBag.ErrorMessage ?? "";
+}
+
+<h2>UnallocateClassrooms</h2><br />
+<h4 style="color:forestgreen">@message</h4><h4 style="color:red">@errorMessage</h4>
+<hr />
+
+@using (Html.BeginForm("UnallocateClassrooms", "Department", FormMethod.Post, new { id = "unallocateClassroom" }))
+{
+    <div class="form-horizontal">
+        <div class="form-control">
+            <div class="col-md-offset-5 col-md-10">
+                <input type="submit" class="btn btn-danger" value="Unallocate Rooms" onclick="return confirm('Are you Sure you unallocate all Classrooms?')" />
+            </div>
+        </div>
+    </div>
+
+}

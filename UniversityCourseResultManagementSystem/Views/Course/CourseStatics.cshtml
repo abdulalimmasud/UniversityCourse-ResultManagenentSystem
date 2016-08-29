@@ -1,0 +1,71 @@
+﻿
+@{
+    ViewBag.Title = "CourseStatics";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>View Course Statics</h2>
+<br />
+@using (Html.BeginForm("CourseOfDepartment", "Course", FormMethod.Get))
+{
+    <div class="form-horizontal">
+        <div class="form-group">
+            @Html.Label("Department", htmlAttributes: new { @class = "control-label col-md-offset-1 col-md-1" })
+            <div class="col-md-offset-1 col-md-1">
+                @Html.DropDownList("Department", new SelectList(ViewBag.DepartmentList, "Value", "Text")@*, new {@onchange="this.form.sumbit()" }*@)
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <table id="viewCourseTable" class="table table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name/Title</th>
+                    <th>Semester</th>
+                    <th>Assign To</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+}
+    
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#Department").change(function () {
+            var deptCode = $("#Department").val();
+            $("#viewCourseTable tbody tr").remove();
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("ViewCourseStatics")',
+                dataType: 'json',
+                data: { code: $("#Department").val() },
+                success: function (data) {
+                    var courses = '';
+                    $.each(data, function (c, course) {
+                        var rows = "<tr>"
+                        + "<td>" + course.Code + "</td>"
+                        + "<td>" + course.Name + "</td>"
+                        + "<td>" + course.Semester + "</td>"
+                        + "<td>" + course.AssignTo + "</td>"
+                        + "</tr>";
+                        $('#viewCourseTable tbody').append(rows);
+                    })
+                },
+                error: function (ex) {
+                    var r = jQuery.parseJSON(response.responseText);
+                    alert("Message: " + r.Message);
+                    alert("StackTrace: " + r.StackTrace);
+                    alert("Execption Type: " + r.ExceptionType);
+                }
+            })
+            return false;
+        })
+    })
+</script>
+
+
+

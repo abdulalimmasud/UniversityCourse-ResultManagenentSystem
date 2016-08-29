@@ -1,0 +1,42 @@
+﻿body{
+    background-color:lightsteelblue;
+    color:black;
+}
+
+ul{
+    margin:0px; padding:0px;
+}
+
+ul li a{
+    text-decoration:none;
+    color:white;
+    display:block;
+}
+
+ul li{
+    float:left;
+    width:150px;
+    height:40px;
+    font-size:16px;
+    line-height:32px;
+    background-color:dimgrey;
+    text-align:center;
+    opacity:.8;
+}
+
+ul li a:hover{
+    background-color:antiquewhite;
+}
+
+ul li ul li{
+    display:none;
+    width:200px;
+}
+
+ul li:hover ul li{
+    display:block;
+}
+ul li ul li a{
+    color:white;
+    border:1px solid #566b2e;
+}

@@ -1,0 +1,130 @@
+﻿@model UniversityCourseResultManagementSystem.Models.StudentResult
+
+@{
+    ViewBag.Title = "ViewResult";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>View Result</h2>
+
+@using (Html.BeginForm()) 
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal" id="viewResult">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.Student, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.Student, new SelectList(ViewBag.RegistationList, "Value", "Text"), new { @class = "form-control", @onchange = "FillField()" })
+                @Html.ValidationMessageFor(model => model.Student, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.Name, new { @class = "form-control", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Department, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.Department, new { @class = "form-control", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.Department, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-lg-offset-4 col-lg-push-8"> 
+                              
+                <input type="button" value="Make PDF" class="btn btn-default" onclick="genPdf()" />
+            </div>
+        </div>
+        <div class="form-group" id="tableDiv">
+            <table id="viewStudentResult" class="table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>Course Code</th>
+                        <th>Name</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+}
+<script src="~/Scripts/jquery-3.1.0.min.js"></script>
+<script src="~/Scripts/jspdf.min.js"></script>
+<script>
+    function genPdf() {
+        var regNo = $('#Student option:selected').text();
+        var nam = $('#Name').val();
+        var email = $('#Email').val();
+        var dept = $('#Department').val();
+        var doc = new jsPDF();
+        doc.text(20, 20, 'Registration No. ' + regNo);
+        doc.text(20, 30, 'Name : ' + nam);
+        doc.text(20, 40, 'Email : ' + email);
+        doc.text(20, 50, 'Department : ' + dept);
+        doc.fromHTML($('#tableDiv').get(0), 20, 60);
+        
+
+        doc.save('StudentResult.pdf');
+    }
+
+    function FillField() {
+        $("#Name").empty();
+        $("#Email").empty();
+        $("#Department").empty();
+        $("#viewStudentResult tbody tr").remove();
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("StudentInformation")',
+            dataType: 'json',
+            data: { id: $("#Student").val() },
+            success: function (data) {
+                $("#Name").val(data.Name);
+                $("#Email").val(data.Email);
+                $("#Department").val(data.Department);
+            }
+        })
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("ViewStudentResult")',
+            dataType: 'json',
+            data: { id: $("#Student").val() },
+            success: function (data) {
+                var results = '';
+                $.each(data, function (r, result) {
+                    var rows = "<tr>"
+                    + "<td>" + result.Course + "</td>"
+                    + "<td>" + result.CourseName + "</td>"
+                    + "<td>" + result.GradeLetter + "</td>"
+                    + "</tr>";
+                    $("#viewStudentResult").append(rows);
+                })
+            },
+            error: function (ex) {
+                var r = jQuery.parseJSON(response.responseText);
+                alert("Message: " + r.Message);
+                alert("StackTrace: " + r.StackTrace);
+                alert("Execption Type: " + r.ExceptionType);
+            }
+        })
+        return false;
+    }
+</script>
+
